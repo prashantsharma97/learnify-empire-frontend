@@ -1,12 +1,12 @@
 import React from 'react';
-import Navbar from '../components/Navbar';
-import HeroSection from '../components/HeroSection';
-import FeaturesSection from '../components/FeaturesSection';
-import HowItWorks from '../components/HowItWorks';
-import Testimonials from '../components/Testimonials';
-import Pricing from '../components/Pricing';
-import Faq from '../components/Faq';
-import Footer from '../components/Footer';
+import Navbar from '../landingPageComponents/Navbar';
+import HeroSection from '../landingPageComponents/HeroSection';
+import FeaturesSection from '../landingPageComponents/FeaturesSection';
+import HowItWorks from '../landingPageComponents/HowItWorks';
+import Testimonials from '../landingPageComponents/Testimonials';
+import Pricing from '../landingPageComponents/Pricing';
+import Faq from '../landingPageComponents/Faq';
+import Footer from '../landingPageComponents/Footer';
 
 function Landing() {
   return (
