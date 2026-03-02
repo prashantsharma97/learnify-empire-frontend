@@ -23,7 +23,7 @@ const Pricing: React.FC = () => {
   ];
 
   return (
-    <section id="pricing" className="py-20 relative">
+    <section id="pricing" className="py-10 relative">
       {/* Background gradient */}
       <div className="absolute bottom-0 right-0 w-1/2 h-1/2 bg-neon-purple/10 rounded-full filter blur-[120px]" />
       

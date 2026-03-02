@@ -48,7 +48,7 @@ const FeaturesSection: React.FC = () => {
   ];
 
   return (
-    <section id="features" className="py-20 relative">
+    <section id="features" className="py-10 relative">
       {/* Background gradient */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-3/4 h-3/4 bg-neon-purple/10 rounded-full filter blur-[120px]" />
       

@@ -23,6 +23,7 @@ import StudentDashboard from './pages/Dashboard/Student/studentDashboard';
 import MyCoursesStudent from './pages/Dashboard/Student/MyCoursesStudent';
 import Progress from './pages/Dashboard/Student/Progress';
 import Payments from './pages/Dashboard/Student/Payments';
+import Settings from './pages/Dashboard/Settings';
 
 function App() {
   return (
@@ -83,6 +84,19 @@ function App() {
 
           {/* Redirect Unknown Routes */}
           <Route path="*" element={<Navigate to="/login" replace />} />
+
+                {/* Settings Route - Common for all roles */}
+                <Route
+                path="/dashboard/settings"
+                element={
+                  <ProtectedRoute allowedRoles={['admin', 'instructor', 'student']}>
+                  <DashboardLayout role="settings" />
+                  </ProtectedRoute>
+                }
+                >
+                <Route index element={<Settings />} />
+                </Route>
+          {/* <Route path="/setting" element={<Navigate to="/settings" replace />} /> */}
         </Routes>
       </div>
     </Router>

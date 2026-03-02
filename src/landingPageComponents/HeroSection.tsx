@@ -3,7 +3,7 @@ import { Play, ArrowRight } from 'lucide-react';
 
 const HeroSection: React.FC = () => {
   return (
-    <section className="relative pt-28 pb-20 md:pt-36 md:pb-28 overflow-hidden">
+    <section className="relative pt-10 pb-10 md:pt-36 md:pb-10 overflow-hidden">
       {/* Background gradient effects */}
       <div className="absolute top-0 left-0 w-full h-full overflow-hidden">
         <div className="absolute top-1/4 -left-1/4 w-1/2 h-1/2 bg-neon-purple/20 rounded-full filter blur-[120px]" />
@@ -48,7 +48,7 @@ const HeroSection: React.FC = () => {
                 <img 
                   src="https://images.pexels.com/photos/5926387/pexels-photo-5926387.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2" 
                   alt="Learnify Dashboard" 
-                  className="rounded-lg shadow-2xl border border-neon-blue/30 w-full"
+                  className="rounded-lg shadow-2xl border border-neon-blue/30 w-full h-[480px] "
                 />
                 {/* Neon border glow effect */}
                 <div className="absolute -inset-0.5 bg-gradient-to-r from-neon-blue to-neon-purple rounded-lg opacity-50 blur-sm -z-10"></div>

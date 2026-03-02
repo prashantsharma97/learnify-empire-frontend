@@ -63,7 +63,7 @@ const Faq: React.FC = () => {
   ];
 
   return (
-    <section id="faq" className="py-20 relative">
+    <section id="faq" className="py-10 relative">
       {/* Background gradient */}
       <div className="absolute top-0 left-0 w-1/2 h-1/2 bg-neon-pink/10 rounded-full filter blur-[120px]" />
       

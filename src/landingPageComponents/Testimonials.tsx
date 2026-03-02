@@ -80,7 +80,7 @@ const Testimonials: React.FC = () => {
   ];
 
   return (
-    <section id="testimonials" className="py-20 relative">
+    <section id="testimonials" className="py-10 relative">
       {/* Background gradient */}
       <div className="absolute top-0 left-0 w-1/2 h-1/2 bg-neon-blue/10 rounded-full filter blur-[120px]" />
       

@@ -96,9 +96,12 @@ const Sidebar: React.FC<SidebarProps> = ({ role }) => {
                     <ul className="space-y-2">
                         <li>
                             <Link
-                                to="/admin/settings"
-                                className="flex items-center px-4 py-3 text-gray-400 rounded-lg hover:bg-neon-purple/10 
-                           hover:text-white hover:border hover:border-neon-purple/30 transition-all duration-300"
+                                to="/dashboard/settings"
+                                className={`flex items-center px-4 py-3 rounded-lg transition-all duration-300 ${
+                                    location.pathname === '/dashboard/settings'
+                                        ? 'bg-neon-blue/20 text-white border border-neon-blue/30'
+                                        : 'text-gray-400 hover:text-white hover:bg-neon-blue/10'
+                                }`}
                             >
                                 <Settings className="w-5 h-5 mr-3" />
                                 Settings
