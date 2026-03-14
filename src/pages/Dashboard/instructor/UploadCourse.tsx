@@ -1,13 +1,121 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import toast from "react-hot-toast";
+import { getCoursesById, createCourse, updateCourse } from '../../../apiComponents/apiService.jsx';
 
 const UploadCourse = () => {
+  const { id } = useParams();
+  const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
+
+  const [thumbnailPreview, setThumbnailPreview] = useState("");
+  const [thumbnailFile, setThumbnailFile] = useState(null);
+
+  const handleThumbnailUpload = (e) => {
+    const file = e.target.files[0];
+    console.log("Thumbnail file:", file);
+    if (!file) return;
+    setThumbnailFile(file);
+    const previewUrl = URL.createObjectURL(file);
+    setThumbnailPreview(previewUrl);
+  };
+
+  useEffect(() => {
+    if (id) {
+      fetchCourse();
+      setCurrentStep(1);
+    }
+  }, [id]);
+
+  const fetchCourse = async () => {
+    try {
+      setLoading(true);
+      const response = await getCoursesById(id);
+      const course = response.data.course;
+      console.log("Fetched course data:", course);
+      setCourseData({
+        title: course.title || "",
+        description: course.description || "",
+        category: course.category || "",
+        level: course.difficultyLevel || "",
+        pricingInfo: {
+          coursePrice: course.pricingInfo?.coursePrice || "",  
+          paymentType: course.pricingInfo?.paymentType || "",  
+        },
+        thumbnail: course.thumbnail || "",
+        topics: course.topics || [],
+        lessons: course.lessons || [],
+      });
+
+      setThumbnailPreview(course.thumbnail);
+      setLoading(false);
+    } catch (error) {
+      console.error("Error fetching course data:", error);
+      setLoading(false);
+    }
+  };
+
+  const handleChange = (e: any) => {
+    const { name, value } = e.target;
+    if (name === "price" || name === "paymentType") {
+      setCourseData((prev) => ({
+        ...prev,
+        pricingInfo: {
+          ...prev.pricingInfo,
+          [name === "price" ? "coursePrice" : "paymentType"]: value,
+        },
+      }));
+    } else {
+      setCourseData((prev) => ({
+        ...prev,
+        [name]: value,
+      }));
+    }
+  };
+
+  const handleSubmit = async (e: any) => {
+    e.preventDefault();
+    try {
+      setLoading(true);
+      const coursePayload = {
+        ...courseData,
+        pricingInfo: {
+          ...courseData.pricingInfo,
+        },
+        difficultyLevel: courseData.level,
+        thumbnail: thumbnailPreview,
+      };
+      if (id) {
+        // Update existing course
+        console.log("ddsd")
+        await updateCourse(id, coursePayload);
+        console.log("Course updated successfully for ID:", id, "with data:", coursePayload);
+        toast.success("Course data updated successfully!");
+      } else {
+        // Create new course
+        await createCourse(coursePayload);
+        console.log("Course created successfully with data:", coursePayload);
+        toast.success("Course created successfully!");
+      }
+      navigate("/dashboard/instructor/my-courses");
+    } catch (error) {
+      console.error("Error submitting course data:", error);
+      toast.error("Failed to submit course data. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const [currentStep, setCurrentStep] = useState(1);
   const [courseData, setCourseData] = useState({
     title: "",
     description: "",
     category: "",
     level: "",
-    price: "",
+    pricingInfo: {
+      coursePrice: "",
+      paymentType: "",
+    },
     thumbnail: "",
     topics: [] as string[],
     lessons: [] as any[],
@@ -25,6 +133,7 @@ const UploadCourse = () => {
   ];
 
   const levels = ["Beginner", "Intermediate", "Advanced", "Expert"];
+  const paymentTypes = ["free", "paid"];
 
   const steps = [
     { id: 1, title: "Basic Info", icon: "📝" },
@@ -69,8 +178,7 @@ const UploadCourse = () => {
       {/* Header */}
       <div>
         <h1 className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-pink-500 to-red-500">
-          Create New Course
-        </h1>
+          {id ? "Edit Course" : "Create New Course"}        </h1>
         <p className="text-gray-400 mt-1">
           Share your expertise with learners worldwide
         </p>
@@ -83,10 +191,10 @@ const UploadCourse = () => {
             <div key={step.id} className="flex items-center">
               <div
                 className={`flex items-center gap-3 px-4 py-2 rounded-lg transition-all duration-300 ${currentStep === step.id
-                    ? "bg-gradient-to-r from-purple-400 to-pink-500 text-white"
-                    : currentStep > step.id
-                      ? "bg-green-500/20 text-green-500"
-                      : "bg-white/5 text-gray-400"
+                  ? "bg-gradient-to-r from-purple-400 to-pink-500 text-white"
+                  : currentStep > step.id
+                    ? "bg-green-500/20 text-green-500"
+                    : "bg-white/5 text-gray-400"
                   }`}
               >
                 <span className="text-xl">{step.icon}</span>
@@ -120,15 +228,12 @@ const UploadCourse = () => {
                   </label>
                   <input
                     type="text"
+                    name="title"
                     placeholder="Enter course title..."
                     value={courseData.title}
-                    onChange={(e) =>
-                      setCourseData((prev) => ({
-                        ...prev,
-                        title: e.target.value,
-                      }))
-                    }
-                    className="bg-white/5 border-white/20 text-white placeholder:text-gray-400 p-2 rounded-md w-full"
+                    onChange={handleChange}
+
+                    className="bg-white/5 border-white/20 text-white placeholder:text-gray-400 p-2 rounded-md w-full border border-white/20 focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
 
@@ -137,18 +242,15 @@ const UploadCourse = () => {
                     Category
                   </label>
                   <select
+                    name="category"
                     value={courseData.category}
-                    onChange={(e) =>
-                      setCourseData((prev) => ({
-                        ...prev,
-                        category: e.target.value,
-                      }))
-                    }
-                    className="bg-white/5 border-white/20 text-white p-2 rounded-md w-full"
+                    onChange={handleChange}
+
+                    className="bg-white/5 border-white/20 text-white p-2 rounded-md w-full border border-white/20 focus:ring-2 focus:ring-blue-500"
                   >
-                    <option value="">Select category</option>
+                    <option value="" className="bg-transparent">Select category</option>
                     {categories.map((category) => (
-                      <option key={category} value={category}>
+                      <option key={category} value={category} className="bg-transparent">
                         {category}
                       </option>
                     ))}
@@ -160,14 +262,11 @@ const UploadCourse = () => {
                     Difficulty Level
                   </label>
                   <select
+                    name="level"
                     value={courseData.level}
-                    onChange={(e) =>
-                      setCourseData((prev) => ({
-                        ...prev,
-                        level: e.target.value,
-                      }))
-                    }
-                    className="bg-white/5 border-white/20 text-white p-2 rounded-md w-full"
+                    onChange={handleChange}
+
+                    className="bg-white/5 border-white/20 text-white p-2 rounded-md w-full border border-white/20 focus:ring-2 focus:ring-blue-500"
                   >
                     <option value="">Select level</option>
                     {levels.map((level) => (
@@ -184,15 +283,11 @@ const UploadCourse = () => {
                   Course Description
                 </label>
                 <textarea
+                  name="description"
                   placeholder="Describe what students will learn..."
                   value={courseData.description}
-                  onChange={(e) =>
-                    setCourseData((prev) => ({
-                      ...prev,
-                      description: e.target.value,
-                    }))
-                  }
-                  className="bg-white/5 border-white/20 text-white placeholder:text-gray-400 p-2 rounded-md w-full h-48 resize-none"
+                  onChange={handleChange}
+                  className="bg-white/5 border-white/20 text-white placeholder:text-gray-400 p-2 rounded-md w-full h-48 resize-none border border-white/20 focus:ring-2 focus:ring-blue-500"
                 />
               </div>
             </div>
@@ -201,10 +296,51 @@ const UploadCourse = () => {
               <label className="block text-white font-medium mb-2">
                 Course Thumbnail
               </label>
-              <div className="border-2 border-dashed border-white/20 rounded-lg p-8 text-center hover:border-pink-500/50 transition-colors cursor-pointer">
-                <div className="text-4xl mb-2">📁</div>
-                <p className="text-gray-400">Click to upload or drag and drop</p>
-                <p className="text-sm text-gray-500">PNG, JPG up to 2MB</p>
+              <div className="border-2 border-dashed border-white/20 rounded-lg p-6 text-center relative">
+
+                {thumbnailPreview ? (
+                  <div className="relative inline-block">
+                    <img
+                      src={thumbnailPreview}
+                      alt="Thumbnail"
+                      className="w-64 h-40 object-cover rounded-lg mx-auto"
+                    />
+
+                    {/* Remove Button */}
+                    <button
+                      onClick={() => {
+                        setThumbnailPreview("");
+                        setThumbnailFile(null);
+                        setCourseData((prev) => ({ ...prev, thumbnail: "" }));
+                      }}
+                      className="absolute -top-2 -right-2 bg-red-500 hover:bg-red-600 text-white rounded-full w-7 h-7 flex items-center justify-center shadow-lg"
+                    >
+                      ✕
+                    </button>
+                  </div>
+                ) : (
+                  <div>
+                    <div className="text-4xl mb-2">📁</div>
+                    <p className="text-gray-400">Click to upload thumbnail</p>
+                  </div>
+                )}
+
+                <input
+                  type="file"
+                  name="thumbnail"
+                  accept="image/*"
+                  onChange={handleThumbnailUpload}
+                  className="hidden"
+                  id="thumbnailUpload"
+                />
+
+                <label
+                  htmlFor="thumbnailUpload"
+                  className="cursor-pointer text-sm text-purple-400 hover:text-pink-400 mt-3 block"
+                >
+                  Upload Image
+                </label>
+
               </div>
             </div>
           </div>
@@ -246,11 +382,10 @@ const UploadCourse = () => {
                       </label>
                       <input
                         type="text"
+                        name="title"
                         placeholder="Enter lesson title..."
                         value={lesson.title}
-                        onChange={(e) =>
-                          updateLesson(lesson.id, "title", e.target.value)
-                        }
+                        onChange={(e) => updateLesson(lesson.id, "title", e.target.value)}
                         className="bg-white/5 border-white/20 text-white p-2 rounded-md w-full"
                       />
                     </div>
@@ -261,11 +396,10 @@ const UploadCourse = () => {
                       </label>
                       <input
                         type="text"
+                        name="duration"
                         placeholder="Duration in minutes"
                         value={lesson.duration}
-                        onChange={(e) =>
-                          updateLesson(lesson.id, "duration", e.target.value)
-                        }
+                        onChange={(e) => updateLesson(lesson.id, "duration", e.target.value)}
                         className="bg-white/5 border-white/20 text-white p-2 rounded-md w-full"
                       />
                     </div>
@@ -278,9 +412,7 @@ const UploadCourse = () => {
                     <textarea
                       placeholder="Describe the lesson content..."
                       value={lesson.description}
-                      onChange={(e) =>
-                        updateLesson(lesson.id, "description", e.target.value)
-                      }
+                      onChange={(e) => updateLesson(lesson.id, "description", e.target.value)}
                       className="bg-white/5 border-white/20 text-white placeholder:text-gray-400 p-2 rounded-md w-full h-32 resize-none"
                     />
                   </div>
@@ -291,11 +423,11 @@ const UploadCourse = () => {
                     </label>
                     <input
                       type="url"
+                      name="videoUrl"
                       placeholder="Enter video URL"
                       value={lesson.videoUrl}
-                      onChange={(e) =>
-                        updateLesson(lesson.id, "videoUrl", e.target.value)
-                      }
+                      onChange={(e) => updateLesson(lesson.id, "videoUrl", e.target.value)}
+
                       className="bg-white/5 border-white/20 text-white placeholder:text-gray-400 p-2 rounded-md w-full"
                     />
                   </div>
@@ -319,14 +451,11 @@ const UploadCourse = () => {
                 </label>
                 <input
                   type="number"
+                  name="price"
                   placeholder="Enter course price"
-                  value={courseData.price}
-                  onChange={(e) =>
-                    setCourseData((prev) => ({
-                      ...prev,
-                      price: e.target.value,
-                    }))
-                  }
+                  value={courseData.pricingInfo.coursePrice}
+                  onChange={handleChange}
+
                   className="bg-white/5 border-white/20 text-white placeholder:text-gray-400 p-2 rounded-md w-full"
                 />
               </div>
@@ -336,34 +465,119 @@ const UploadCourse = () => {
                   Payment Type
                 </label>
                 <select
-                  value={courseData.price}
-                  onChange={(e) =>
-                    setCourseData((prev) => ({
-                      ...prev,
-                      price: e.target.value,
-                    }))
-                  }
+                  name="paymentType"
+                  value={courseData.pricingInfo.paymentType}
+                  onChange={handleChange}
+
                   className="bg-white/5 border-white/20 text-white p-2 rounded-md w-full"
                 >
-                  <option value="">Select payment type</option>
-                  <option value="Free">Free</option>
-                  <option value="Paid">Paid</option>
+                  {paymentTypes.map((type) => (
+                    <option key={type} value={type}>
+                      {type}
+                    </option>
+                  ))}
                 </select>
               </div>
             </div>
           </div>
         )}
 
-        {/* Step 4: Review */}
         {currentStep === 4 && (
-          <div className="space-y-6">
-            <h2 className="text-2xl font-semibold text-white mb-6">👁️ Review</h2>
-            <p className="text-gray-400">
-              Please review your course details before submitting.
-            </p>
-            <pre className="text-white bg-gray-800 p-6 rounded-md">
-              {JSON.stringify(courseData, null, 2)}
-            </pre>
+          <div className="space-y-8">
+
+            <h2 className="text-2xl font-semibold text-white">
+              👁️ Review Your Course
+            </h2>
+
+            {/* Basic Info */}
+            <div className="bg-white/5 border border-neon-purple/20 rounded-lg p-6 space-y-4">
+              <h3 className="text-xl text-white font-semibold">📚 Basic Information</h3>
+
+              <div className="grid md:grid-cols-2 gap-6">
+
+                <div>
+                  <p className="text-gray-400 text-sm">Title</p>
+                  <p className="text-white font-medium">{courseData.title}</p>
+                </div>
+
+                <div>
+                  <p className="text-gray-400 text-sm">Category</p>
+                  <p className="text-white font-medium">{courseData.category}</p>
+                </div>
+
+                <div>
+                  <p className="text-gray-400 text-sm">Level</p>
+                  <p className="text-white font-medium">{courseData.level}</p>
+                </div>
+
+                <div>
+                  <p className="text-gray-400 text-sm">Price</p>
+                  <p className="text-green-400 font-semibold">
+                    ${courseData.pricingInfo?.coursePrice || "Free"}
+                  </p>
+                </div>
+
+              </div>
+
+              <div>
+                <p className="text-gray-400 text-sm">Description</p>
+                <p className="text-white">{courseData.description}</p>
+              </div>
+            </div>
+
+            {/* Thumbnail */}
+            {thumbnailPreview && (
+              <div className="bg-white/5 border border-neon-purple/20 rounded-lg p-6">
+                <h3 className="text-xl text-white font-semibold mb-4">🖼️ Thumbnail</h3>
+
+                <img
+                  src={thumbnailPreview}
+                  alt="Course Thumbnail"
+                  className="w-72 rounded-lg border border-white/10"
+                />
+              </div>
+            )}
+
+            {/* Lessons */}
+            <div className="bg-white/5 border border-neon-purple/20 rounded-lg p-6 space-y-4">
+
+              <h3 className="text-xl text-white font-semibold">
+                🎥 Lessons ({courseData.lessons.length})
+              </h3>
+
+              {courseData.lessons.length === 0 ? (
+                <p className="text-gray-400">No lessons added</p>
+              ) : (
+                <div className="space-y-4">
+                  {courseData.lessons.map((lesson, index) => (
+                    <div
+                      key={lesson.id || index}
+                      className="bg-white/5 border border-white/10 rounded-lg p-4"
+                    >
+                      <div className="flex justify-between">
+                        <h4 className="text-white font-medium">
+                          {index + 1}. {lesson.title}
+                        </h4>
+                        <span className="text-sm text-gray-400">
+                          {lesson.duration}
+                        </span>
+                      </div>
+
+                      <p className="text-gray-400 text-sm mt-2">
+                        {lesson.description}
+                      </p>
+
+                      {lesson.videoUrl && (
+                        <p className="text-xs text-purple-400 mt-1">
+                          {lesson.videoUrl}
+                        </p>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
           </div>
         )}
 
@@ -388,8 +602,12 @@ const UploadCourse = () => {
           )}
 
           {currentStep === 4 && (
-            <button className="bg-green-500 text-white p-2 rounded-md">
-              Submit
+            <button
+              className="bg-green-500 text-white p-2 rounded-md"
+              onClick={handleSubmit}
+              disabled={loading}
+            >
+              {loading ? "Saving..." : id ? "Update Course" : "Create Course"}
             </button>
           )}
         </div>

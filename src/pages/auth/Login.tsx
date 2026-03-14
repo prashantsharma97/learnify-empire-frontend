@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useContext, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Mail, Lock, ArrowRight } from 'lucide-react';
-import { loginUser } from '../../apiComponents/apiService.js';
+import { Mail, Lock, ArrowRight, EyeOff, Eye } from 'lucide-react';
+import { loginUser } from '../../apiComponents/apiService.jsx';
 import { jwtDecode } from 'jwt-decode';
+import { UserContext } from '../../components/context/UserContext';
 
 function Login() {
   const [formData, setFormData] = useState({
@@ -12,36 +13,39 @@ function Login() {
   });
   const [message, setMessage] = useState('');
   const navigate = useNavigate();
+  const [showPassword, setShowPassword] = useState(false);
+
+  const { updateUser } = useContext(UserContext);
 
   const handleSubmit = async (e: React.FormEvent) => {
-  e.preventDefault();
+    e.preventDefault();
+    try {
+      const response = await loginUser(formData);
 
-  try {
-    const response = await loginUser(formData);
+      if (response.status === 200 && response.data.token) {
+        const token = response.data.token;
+        localStorage.setItem('token', token);
+        const decoded: any = jwtDecode(token);
+        const role = decoded.role;
+        localStorage.setItem('role', role);
+        updateUser({ email: decoded.email, role, isAuthenticated: true });
 
-    if (response.status === 200 && response.data.token) {
-      const token = response.data.token;
-      localStorage.setItem('token', token);
-      const decoded: any = jwtDecode(token); 
-      const role = decoded.role;
-              console.log(decoded);
-
-      if (role === 'admin') {
-        navigate('/dashboard/admin');
-      } else if (role === 'instructor') {
-        navigate('/dashboard/instructor');
-      } else if (role === 'student') {
-        navigate('/dashboard/student');
+        if (role === 'admin') {
+          navigate('/dashboard/admin');
+        } else if (role === 'instructor') {
+          navigate('/dashboard/instructor');
+        } else if (role === 'student') {
+          navigate('/dashboard/student');
+        } else {
+          setMessage('Unknown role');
+        }
       } else {
-        setMessage('Unknown role');
+        setMessage('Unexpected response from server');
       }
-    } else {
-      setMessage('Unexpected response from server');
+    } catch (error: any) {
+      setMessage(error.response?.data?.message || 'Login failed');
     }
-  } catch (error: any) {
-    setMessage(error.response?.data?.message || 'Login failed');
-  }
-};
+  };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({
@@ -113,7 +117,7 @@ function Login() {
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
                 <input
-                  type="password"
+                  type={showPassword ? "text" : "password"}
                   name="password"
                   value={formData.password}
                   onChange={handleChange}
@@ -123,6 +127,13 @@ function Login() {
                   placeholder="Enter your password"
                   required
                 />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-neon-blue"
+                >
+                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
               </div>
             </div>
 

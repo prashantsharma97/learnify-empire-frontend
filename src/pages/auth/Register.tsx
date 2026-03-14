@@ -1,13 +1,14 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Mail, Lock, User, ArrowRight } from 'lucide-react';
-import { registerUser } from '../../apiComponents/apiService.js';
+import { Mail, Lock, User, ArrowRight, Phone, Eye, EyeOff } from 'lucide-react';
+import { registerUser } from '../../apiComponents/apiService.jsx';
 import { jwtDecode } from 'jwt-decode';
 
 function Register() {
   const [formData, setFormData] = useState({
     username: '',
     email: '',
+    phone: '',
     password: '',
     confirmPassword: '',
     tenantId: ''
@@ -16,6 +17,8 @@ function Register() {
   const [message, setMessage] = useState('');
   const [role, setRole] = useState<'student' | 'instructor'>('student');
   const navigate = useNavigate();
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -41,14 +44,14 @@ function Register() {
         console.log(decoded);
         console.log(role);
         if (role === 'admin') {
-        navigate('/dashboard/admin');
-      } else if (role === 'instructor') {
-        navigate('/dashboard/instructor');
-      } else if (role === 'student') {
-        navigate('/dashboard/student');
-      } else {
-        setMessage('Unknown role');
-      }
+          navigate('/dashboard/admin');
+        } else if (role === 'instructor') {
+          navigate('/dashboard/instructor');
+        } else if (role === 'student') {
+          navigate('/dashboard/student');
+        } else {
+          setMessage('Unknown role');
+        }
       } else {
         setMessage('Unexpected response from server');
       }
@@ -167,20 +170,46 @@ function Register() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium mb-2">Password</label>
+              <label className="block text-sm font-medium mb-2">Phone Number</label>
               <div className="relative">
-                <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
+                <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
                 <input
-                  type="password"
-                  name="password"
-                  value={formData.password}
+                  type="number"
+                  name="phone"
+                  value={formData.phone}
                   onChange={handleChange}
                   className="w-full pl-10 pr-4 py-3 bg-glass-dark backdrop-blur-sm border border-neon-blue/30 rounded-lg
                            focus:outline-none focus:border-neon-blue text-white placeholder-gray-500
                            transition-all duration-300"
+                  placeholder="Enter your phone number"
+                  required
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium mb-2">Password</label>
+              <div className="relative">
+                <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
+
+                <input
+                  type={showPassword ? "text" : "password"}
+                  name="password"
+                  value={formData.password}
+                  onChange={handleChange}
+                  className="w-full pl-10 pr-12 py-3 bg-glass-dark backdrop-blur-sm border border-neon-blue/30 rounded-lg
+    focus:outline-none focus:border-neon-blue text-white placeholder-gray-500 transition-all duration-300"
                   placeholder="Create a password"
                   required
                 />
+
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-neon-blue"
+                >
+                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
               </div>
             </div>
 
@@ -189,16 +218,23 @@ function Register() {
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
                 <input
-                  type="password"
+                  type={showConfirmPassword ? "text" : "password"}
                   name="confirmPassword"
                   value={formData.confirmPassword}
                   onChange={handleChange}
-                  className="w-full pl-10 pr-4 py-3 bg-glass-dark backdrop-blur-sm border border-neon-blue/30 rounded-lg
-                           focus:outline-none focus:border-neon-blue text-white placeholder-gray-500
-                           transition-all duration-300"
+                  className="w-full pl-10 pr-12 py-3 bg-glass-dark backdrop-blur-sm border border-neon-blue/30 rounded-lg
+    focus:outline-none focus:border-neon-blue text-white placeholder-gray-500 transition-all duration-300"
                   placeholder="Confirm your password"
                   required
                 />
+
+                <button
+                  type="button"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-neon-blue"
+                >
+                  {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
               </div>
             </div>
 

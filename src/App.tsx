@@ -24,82 +24,85 @@ import MyCoursesStudent from './pages/Dashboard/Student/MyCoursesStudent';
 import Progress from './pages/Dashboard/Student/Progress';
 import Payments from './pages/Dashboard/Student/Payments';
 import Settings from './pages/Dashboard/Settings';
+import { UserContextProvider } from './components/context/UserContext';
 
 function App() {
   return (
-    <Router>
-      <div className="font-poppins text-white bg-background-dark min-h-screen overflow-hidden relative">
-        <ParticleBackground />
-        <Routes>
+    <UserContextProvider>
+      <Router>
+        <div className="font-poppins text-white bg-background-dark min-h-screen overflow-hidden relative">
+          <ParticleBackground />
+          <Routes>
 
-          {/* Public Routes */}
-          <Route path="/" element={<Landing />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
+            {/* Public Routes */}
+            <Route path="/" element={<Landing />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Register />} />
 
-          {/* Admin Dashboard */}
-          <Route
-            path="/dashboard/admin"
-            element={
-              <ProtectedRoute allowedRoles={['admin']}>
-                <DashboardLayout role="admin" />
-              </ProtectedRoute>
-            }
-          >
-            <Route index element={<AdminDashboard />} />
-            <Route path="users" element={<UsersPage />} />
-            <Route path="analytics" element={<AnalyticsPage />} />
-            <Route path="reports" element={<Reports />} />
-          </Route>
+            {/* Admin Dashboard */}
+            <Route
+              path="/dashboard/admin"
+              element={
+                <ProtectedRoute allowedRoles={['admin']}>
+                  <DashboardLayout role="admin" />
+                </ProtectedRoute>
+              }
+            >
+              <Route index element={<AdminDashboard />} />
+              <Route path="users" element={<UsersPage />} />
+              <Route path="analytics" element={<AnalyticsPage />} />
+              <Route path="reports" element={<Reports />} />
+            </Route>
 
-          {/* Instructor Dashboard */}
-          <Route
-            path="/dashboard/instructor"
-            element={
-              <ProtectedRoute allowedRoles={['instructor']}>
-                <DashboardLayout role="instructor" />
-              </ProtectedRoute>
-            }
-          >
-            <Route index element={<InstructorDashboard />} />
-            <Route path="my-courses" element={<MyCourses />} />
-            <Route path="upload-course" element={<UploadCourse />} />
-            <Route path="earnings" element={<Earnings />} />
-          </Route>
+            {/* Instructor Dashboard */}
+            <Route
+              path="/dashboard/instructor"
+              element={
+                <ProtectedRoute allowedRoles={['instructor']}>
+                  <DashboardLayout role="instructor" />
+                </ProtectedRoute>
+              }
+            >
+              <Route index element={<InstructorDashboard />} />
+              <Route path="my-courses" element={<MyCourses />} />
+              <Route path="upload-course" element={<UploadCourse />} />
+              <Route path="edit-course/:id" element={<UploadCourse />} />
+              <Route path="earnings" element={<Earnings />} />
+            </Route>
 
-          {/* Student Dashboard */}
-          <Route
-            path="/dashboard/student"
-            element={
-              <ProtectedRoute allowedRoles={['student']}>
-                <DashboardLayout role="student" />
-              </ProtectedRoute>
-            }
-          >
-            <Route index element={<StudentDashboard />} />
-            <Route path="my-courses" element={<MyCoursesStudent />} />
-            <Route path="progress" element={<Progress />} />
-            <Route path="payments" element={<Payments />} />
-          </Route>
+            {/* Student Dashboard */}
+            <Route
+              path="/dashboard/student"
+              element={
+                <ProtectedRoute allowedRoles={['student']}>
+                  <DashboardLayout role="student" />
+                </ProtectedRoute>
+              }
+            >
+              <Route index element={<StudentDashboard />} />
+              <Route path="my-courses" element={<MyCoursesStudent />} />
+              <Route path="progress" element={<Progress />} />
+              <Route path="payments" element={<Payments />} />
+            </Route>
 
-          {/* Redirect Unknown Routes */}
-          <Route path="*" element={<Navigate to="/login" replace />} />
+            {/* Settings Route - Common for all roles */}
+            <Route
+              path="/dashboard/settings"
+              element={
+                <ProtectedRoute allowedRoles={['admin', 'instructor', 'student']}>
+                  <DashboardLayout role="admin" /> {/* or use the appropriate role */}
+                </ProtectedRoute>
+              }
+            >
+              <Route index element={<Settings />} />
+            </Route>
 
-                {/* Settings Route - Common for all roles */}
-                <Route
-                path="/dashboard/settings"
-                element={
-                  <ProtectedRoute allowedRoles={['admin', 'instructor', 'student']}>
-                  <DashboardLayout role="settings" />
-                  </ProtectedRoute>
-                }
-                >
-                <Route index element={<Settings />} />
-                </Route>
-          {/* <Route path="/setting" element={<Navigate to="/settings" replace />} /> */}
-        </Routes>
-      </div>
-    </Router>
+            {/* Redirect Unknown Routes */}
+            <Route path="*" element={<Navigate to="/login" replace />} />
+          </Routes>
+        </div>
+      </Router>
+    </UserContextProvider>
   );
 }
 
