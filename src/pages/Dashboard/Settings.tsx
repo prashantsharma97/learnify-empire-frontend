@@ -17,6 +17,8 @@ const Settings: React.FC = () => {
     bio: " ",
   });
 
+  const [imageFile, setImageFile] = useState<File | null>(null);
+
   const tabs = [
     { id: 'profile', label: 'Profile', icon: <User className="w-4 h-4" /> },
     { id: 'security', label: 'Security', icon: <Lock className="w-4 h-4" /> },
@@ -71,6 +73,32 @@ const Settings: React.FC = () => {
       setLoading(false);
     }
 
+  };
+
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files) {
+      const file = e.target.files[0];
+      setImageFile(file);
+    }
+  };
+
+  const handleImageUpload = async () => {
+    if (imageFile) {
+      try {
+        const formData = new FormData();
+        formData.append('image', imageFile);
+        const response = await updateInstructorDetails(formData);  
+        const updatedImageUrl = response.data.profileImageUrl;
+        setProfileData(prevData => ({
+          ...prevData,
+          profileImage: updatedImageUrl,
+        }));
+        toast.success("Profile image uploaded successfully!");
+      } catch (error) {
+        toast.error("Failed to upload profile image.");
+        console.error("Error uploading image:", error);
+      }
+    }
   };
 
 
