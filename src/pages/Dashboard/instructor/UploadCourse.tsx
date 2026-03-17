@@ -86,10 +86,7 @@ const UploadCourse = () => {
         thumbnail: thumbnailPreview,
       };
       if (id) {
-        // Update existing course
-        console.log("ddsd")
         await updateCourse(id, coursePayload);
-        console.log("Course updated successfully for ID:", id, "with data:", coursePayload);
         toast.success("Course data updated successfully!");
       } else {
         // Create new course

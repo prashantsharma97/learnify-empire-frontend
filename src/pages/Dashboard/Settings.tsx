@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Card from '../../components/ui/Card';
 import Button from '../../components/ui/Button';
+import toast from "react-hot-toast";
 import { User, Mail, Lock, Bell, CreditCard, Download } from 'lucide-react';
-import { updateInstructorDetails } from '../../apiComponents/apiService.jsx';
+import { getInstructorDetails, updateInstructorDetails } from '../../apiComponents/apiService.jsx';
 
 const Settings: React.FC = () => {
   const [activeTab, setActiveTab] = useState('profile');
@@ -16,7 +17,6 @@ const Settings: React.FC = () => {
     bio: " ",
   });
 
-
   const tabs = [
     { id: 'profile', label: 'Profile', icon: <User className="w-4 h-4" /> },
     { id: 'security', label: 'Security', icon: <Lock className="w-4 h-4" /> },
@@ -24,18 +24,23 @@ const Settings: React.FC = () => {
     { id: 'billing', label: 'Billing', icon: <CreditCard className="w-4 h-4" /> },
   ];
 
+  useEffect(() => {
+    fetchCourse();
+  }, []);
+
+
   const fetchCourse = async () => {
     try {
       setLoading(true);
-      const response = await updateInstructorDetails(id,data);
+      const response = await getInstructorDetails();
       const details = response.data.user;
-      console.log("Fetched details data:", details);
       setProfileData({
-        username: user.username || "",
-        email: user.email || "",
-        phone: user.phone || "",
-        role: user.role || "",
-        profileImage: user.profileImage || ""
+        username: details.username || "",
+        email: details.email || "",
+        phone: details.phone || "",
+        role: details.role || "",
+        profileImage: details.profileImage || "",
+        bio: details.bio || "",
       });
 
       setLoading(false);
@@ -44,7 +49,30 @@ const Settings: React.FC = () => {
       setLoading(false);
     }
   };
-  
+
+  const handleChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setProfileData(prevData => ({
+      ...prevData,
+      [name]: value,
+    }));
+
+  };
+
+  const handleSubmit = async () => {
+    try {
+      setLoading(true);
+      const response = await updateInstructorDetails(profileData);
+      setLoading(false);
+      toast.success("Profile updated successfully!");
+    } catch (error) {
+      toast.error("Failed to update profile. Please try again.");
+      console.error("Error updating profile:", error);
+      setLoading(false);
+    }
+
+  };
+
 
   return (
     <div className="space-y-6 translate-x-0 fixed md:relative md:translate-x-0">
@@ -69,30 +97,33 @@ const Settings: React.FC = () => {
           <h2 className="text-xl font-semibold text-white mb-6">Profile Settings</h2>
           <div className="flex flex-col md:flex-row gap-8">
             <div className="md:w-2/3 space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label htmlFor="firstName" className="block text-sm font-medium text-gray-400 mb-1">
-                    First Name
-                  </label>
-                  <input
-                    type="text"
-                    id="firstName"
-                    className="w-full bg-dark-200 border border-gray-700 rounded-lg px-4 py-2 text-gray-600 focus:outline-none focus:ring-2 focus:ring-student-primary"
-                    defaultValue="John"
-                  />
-                </div>
-                <div>
+
+              <div>
+                <label htmlFor="username" className="block text-sm font-medium text-gray-400 mb-1">
+                  User Name
+                </label>
+                <input
+                  type="text"
+                  name="username"
+                  id="username"
+                  className="w-full bg-dark-200 border border-gray-700 rounded-lg px-4 py-2 text-gray-600 focus:outline-none focus:ring-2 focus:ring-student-primary"
+                  value={profileData.username}
+                  onChange={handleChange}
+                />
+              </div>
+              {/* <div>
                   <label htmlFor="lastName" className="block text-sm font-medium text-gray-400 mb-1">
                     Last Name
                   </label>
                   <input
                     type="text"
+                    name=""
                     id="lastName"
                     className="w-full bg-dark-200 border border-gray-700 rounded-lg px-4 py-2 text-gray-600 focus:outline-none focus:ring-2 focus:ring-student-primary"
                     defaultValue="Doe"
                   />
-                </div>
-              </div>
+                </div> */}
+
 
               <div>
                 <label htmlFor="email" className="block text-sm font-medium text-gray-400 mb-1">
@@ -102,13 +133,15 @@ const Settings: React.FC = () => {
                   <div className="flex-grow">
                     <input
                       type="email"
+                      name="email"
                       id="email"
                       className="w-full bg-dark-200 border border-gray-700 rounded-lg px-4 py-2 text-gray-600 focus:outline-none focus:ring-2 focus:ring-student-primary"
-                      defaultValue="john.doe@example.com"
+                      value={profileData.email}
+                      onChange={handleChange}
                     />
                   </div>
                   <div className="ml-2">
-                    <Button variant="student" size="sm" className="h-full">
+                    <Button variant="student" size="sm" className="h-full" >
                       <Mail className="w-4 h-4 mr-1" />
                       Verify
                     </Button>
@@ -122,9 +155,11 @@ const Settings: React.FC = () => {
                 </label>
                 <input
                   type="tel"
+                  name="phone"
                   id="phoneNumber"
                   className="w-full bg-dark-200 border border-gray-700 rounded-lg px-4 py-2 text-gray-600 focus:outline-none focus:ring-2 focus:ring-student-primary"
-                  defaultValue="+1 234 567 890"
+                  value={profileData.phone}
+                  onChange={handleChange}
                 />
               </div>
 
@@ -134,15 +169,18 @@ const Settings: React.FC = () => {
                 </label>
                 <textarea
                   id="bio"
+                  name="bio"
                   rows={4}
                   className="w-full bg-dark-200 border border-gray-700 rounded-lg px-4 py-2 text-gray-600
  focus:outline-none focus:ring-2 focus:ring-student-primary"
-                  defaultValue="I'm a student passionate about web development and design. Currently learning React and JavaScript."
+                  value={profileData.bio}
+                  onChange={handleChange}
                 ></textarea>
               </div>
 
               <div>
-                <Button variant="student" className="btn btn-instructor text-sm px-4 py-2  btn btn-instructor text-sm px-4 py-2 rounded-lg hover:bg-neon-purple/10 hover:text-white hover:border hover:border-neon-purple/30 transition-all duration-300 bg-neon-blue/20 text-white border border-neon-blue/30">Save Changes</Button>
+                <Button variant="student" className="btn btn-instructor text-sm px-4 py-2  btn btn-instructor text-sm px-4 py-2 rounded-lg hover:bg-neon-purple/10 hover:text-white hover:border hover:border-neon-purple/30 transition-all duration-300 bg-neon-blue/20 text-white border border-neon-blue/30" onClick={handleSubmit} disabled={loading}
+                > {loading ? "Saving..." : "Save Changes"}</Button>
               </div>
             </div>
             <div className="md:w-1/3">
