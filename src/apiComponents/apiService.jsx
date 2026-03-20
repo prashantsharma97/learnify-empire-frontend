@@ -18,9 +18,9 @@ const getAuthToken = () => {
 // Create a new axios instance with a base URL and headers
 const API = axios.create({
   baseURL: import.meta.env.VITE_APP_BASE_URL,
-  headers: {
-    'Content-Type': 'application/json',
-  },
+  // headers: {
+  //   'Content-Type': 'application/json',
+  // },
 });
 
 // Add an Axios interceptor to include the token in the Authorization header
@@ -49,6 +49,6 @@ export const deleteCourse = (id) => API.delete(`/instructor/delete-course/${id}`
 // user setting
 export const getInstructorDetails = (id, data) => API.get(`/instructor/instructor-details`);
 export const updateInstructorDetails = (data) => API.put('/instructor/update-instructor-details', data);
-export const changePassword = (id, data) => API.put(`/instructor/change-password/${id}`, data);
+export const changePassword = (data) => API.put('/instructor/change-password/', data);
 
 export default API;
