@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import Card from '../../components/ui/Card';
 import Button from '../../components/ui/Button';
 import toast from "react-hot-toast";
+import { UserContext } from '../../components/context/UserContext';
 import { User, Mail, Lock, Bell, CreditCard, Download, EyeOff, Eye } from 'lucide-react';
 import { getInstructorDetails, updateInstructorDetails, changePassword } from '../../apiComponents/apiService.jsx';
 
@@ -17,6 +18,7 @@ const Settings: React.FC = () => {
     bio: " ",
   });
 
+  const { user } = React.useContext(UserContext);
   const [imageFile, setImageFile] = useState(null);
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -48,10 +50,8 @@ const Settings: React.FC = () => {
     fetchCourse();
   }, []);
 
-
-  const fetchCourse = async () => {
+  const fetchInstructorDetails = async () => {
     try {
-      setLoading(true);
       const response = await getInstructorDetails();
       const details = response.data.user;
       setProfileData({
@@ -62,6 +62,20 @@ const Settings: React.FC = () => {
         profileImage: details.profileImage || "",
         bio: details.bio || "",
       });
+    } catch (error) {
+      console.error("Error fetching instructor details:", error);
+    } 
+  };
+
+  const fetchCourse = async () => {
+    try {
+      setLoading(true);
+      if (user.role === "instructor") {
+        await fetchInstructorDetails();
+      } else if (user.role === "student") {
+        await fetchInstructorDetails();
+        console.log("Student profile fetch logic goes here");
+      }
 
       setLoading(false);
     } catch (error) {
@@ -88,8 +102,20 @@ const Settings: React.FC = () => {
       formData.append("email", profileData.email);
       formData.append("phone", profileData.phone);
       formData.append("bio", profileData.bio);
-      formData.append("profileImage", imageFile);
-      const response = await updateInstructorDetails(formData);
+      formData.append("profileImage", imageFile as any);
+
+      if (user.role === "instructor") {
+        await updateInstructorDetails(formData);
+        console.log("Instructor profile updated successfully");
+      } else if (user.role === "student") {
+        // formData.append("role", "student");
+        await updateInstructorDetails(formData);
+        console.log("Student profile update logic goes here----");
+      } else {
+        // formData.append("role", "admin");
+        console.log("Admin profile update logic goes here");
+      }
+      // const response = await updateInstructorDetails(formData);
       setLoading(false);
       toast.success("Profile updated successfully!");
     } catch (error) {
@@ -106,7 +132,13 @@ const Settings: React.FC = () => {
     }
     try {
       setLoading(true);
-      await changePassword(passwordData);
+      if (user.role === "instructor") {
+        await changePassword(passwordData);
+      } else if (user.role === "student") {
+        await changePassword(passwordData);
+      } else {
+        console.log("Admin password change logic goes here");
+      }
       setLoading(false);
       toast.success("Password changed successfully!");
     } catch (error) {
@@ -125,11 +157,11 @@ const Settings: React.FC = () => {
   const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
       const filee = e.target.files[0];
-      setImageFile(filee);
+      setImageFile(filee as any);
     }
   };
 
-  const getPasswordStrength = (password) => {
+  const getPasswordStrength = (password: string) => {
     let score = 0;
     if (password.length >= 6) score++;
     if (/[a-z]/.test(password)) score++;
@@ -280,12 +312,13 @@ const Settings: React.FC = () => {
       {activeTab === 'security' && (
         <Card variant="student">
           <h2 className="text-xl font-semibold text-white mb-6">Security Settings</h2>
-
           <div className="space-y-6 translate-x-0 fixed md:relative md:translate-x-0">
-            {/* <div>
+            <div>
               <h3 className="text-white font-medium mb-4">Change Password</h3>
               <div className="space-y-4">
-                <div>
+
+                {/* Current Password */}
+                <div className="relative">
                   <label htmlFor="currentPassword" className="block text-sm font-medium text-gray-400 mb-1">
                     Current Password
                   </label>
@@ -295,16 +328,18 @@ const Settings: React.FC = () => {
                     name="currentPassword"
                     value={passwordData.currentPassword}
                     onChange={handlePasswordChange}
-                    className="w-full bg-dark-200 border border-gray-700 rounded-lg px-4 py-2 text-black focus:outline-none focus:ring-2 focus:ring-student-primary"
+                    className="w-full bg-dark-200 border border-gray-700 rounded-lg px-4 py-2 pr-10 text-black focus:outline-none focus:ring-2 focus:ring-student-primary"
                   />
                   <button
                     type="button"
                     onClick={() => setShowCurrentPassword(!showCurrentPassword)}
-                    className="absolute right-3 text-gray-400 hover:text-neon-blue"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-neon-blue"
                   >
                     {showCurrentPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                   </button>
                 </div>
+
+                {/* New Password */}
                 <div className="relative">
                   <label htmlFor="newPassword" className="block text-sm font-medium text-gray-400 mb-1">
                     New Password
@@ -315,18 +350,64 @@ const Settings: React.FC = () => {
                     name="newPassword"
                     value={passwordData.newPassword}
                     onChange={handlePasswordChange}
-                    className="w-full bg-dark-200 border border-gray-700 rounded-lg px-4 py-2 text-black focus:outline-none focus:ring-2 focus:ring-student-primary"
+                    className="w-full bg-dark-200 border border-gray-700 rounded-lg px-4 py-2 pr-10 text-black focus:outline-none focus:ring-2 focus:ring-student-primary"
                   />
                   <button
                     type="button"
                     onClick={() => setShowNewPassword(!showNewPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1 text-gray-400 hover:text-neon-blue"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-neon-blue"
                   >
                     {showNewPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                   </button>
 
+                  {/* Password Strength Bar */}
+                  {passwordData.newPassword && (
+                    <div className="mt-2">
+                      <p
+                        className={`text-sm ${getPasswordStrength(passwordData.newPassword) === "Weak"
+                          ? "text-red-500"
+                          : getPasswordStrength(passwordData.newPassword) === "Medium"
+                            ? "text-yellow-400"
+                            : "text-green-500"
+                          }`}
+                      >
+                        Strength: {getPasswordStrength(passwordData.newPassword)}
+                      </p>
+                      <div className="w-full h-2 bg-gray-700 rounded mt-1">
+                        <div
+                          className={`h-2 rounded transition-all duration-300 ${getPasswordStrength(passwordData.newPassword) === "Weak"
+                            ? "bg-red-500 w-1/3"
+                            : getPasswordStrength(passwordData.newPassword) === "Medium"
+                              ? "bg-yellow-400 w-2/3"
+                              : "bg-green-500 w-full"
+                            }`}
+                        ></div>
+                      </div>
+
+                      {/* Live Checklist */}
+                      <div className="text-sm mt-2 space-y-1">
+                        <p className={passwordData.newPassword.length >= 6 ? "text-green-500" : "text-gray-400"}>
+                          ✔ At least 6 characters
+                        </p>
+                        <p className={/[A-Z]/.test(passwordData.newPassword) ? "text-green-500" : "text-gray-400"}>
+                          ✔ One uppercase letter
+                        </p>
+                        <p className={/[a-z]/.test(passwordData.newPassword) ? "text-green-500" : "text-gray-400"}>
+                          ✔ One lowercase letter
+                        </p>
+                        <p className={/[0-9]/.test(passwordData.newPassword) ? "text-green-500" : "text-gray-400"}>
+                          ✔ One number
+                        </p>
+                        <p className={/[^a-zA-Z0-9]/.test(passwordData.newPassword) ? "text-green-500" : "text-gray-400"}>
+                          ✔ One special character
+                        </p>
+                      </div>
+                    </div>
+                  )}
                 </div>
-                <div>
+
+                {/* Confirm Password */}
+                <div className="relative">
                   <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-400 mb-1">
                     Confirm New Password
                   </label>
@@ -336,165 +417,40 @@ const Settings: React.FC = () => {
                     name="confirmPassword"
                     value={passwordData.confirmPassword}
                     onChange={handlePasswordChange}
-                    className="w-full bg-dark-200 border border-gray-700 rounded-lg px-4 py-2 text-black focus:outline-none focus:ring-2 focus:ring-student-primary"
+                    className="w-full bg-dark-200 border border-gray-700 rounded-lg px-4 py-2 pr-10 text-black focus:outline-none focus:ring-2 focus:ring-student-primary"
                   />
                   <button
                     type="button"
                     onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                    className="absolute right-3 top-1/2 transform -translate-y-1 text-gray-400 hover:text-neon-blue"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-neon-blue"
                   >
                     {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                   </button>
+
+                  {/* Confirm Match */}
+                  {passwordData.confirmPassword && (
+                    <p className={`text-sm mt-1 ${passwordData.confirmPassword === passwordData.newPassword
+                      ? "text-green-500"
+                      : "text-red-500"
+                      }`}>
+                      {passwordData.confirmPassword === passwordData.newPassword
+                        ? "✔ Passwords match"
+                        : "✖ Passwords do not match"}
+                    </p>
+                  )}
                 </div>
+
                 <div>
-                  <Button className='btn btn-instructor text-sm px-4 py-2  btn btn-instructor text-sm px-4 py-2 rounded-lg hover:bg-neon-purple/10 hover:text-white hover:border hover:border-neon-purple/30 transition-all duration-300 bg-neon-blue/20 text-white border border-neon-blue/30' onClick={handlePasswordSubmit} disabled={loading}>
+                  <Button
+                    className='btn btn-instructor text-sm px-4 py-2 rounded-lg hover:bg-neon-purple/10 hover:text-white hover:border hover:border-neon-purple/30 transition-all duration-300 bg-neon-blue/20 text-white border border-neon-blue/30'
+                    onClick={handlePasswordSubmit}
+                    disabled={loading}
+                  >
                     Update Password
                   </Button>
                 </div>
               </div>
-            </div> */}
-            
-            <div>
-  <h3 className="text-white font-medium mb-4">Change Password</h3>
-  <div className="space-y-4">
-
-    {/* Current Password */}
-    <div className="relative">
-      <label htmlFor="currentPassword" className="block text-sm font-medium text-gray-400 mb-1">
-        Current Password
-      </label>
-      <input
-        id="currentPassword"
-        type={showCurrentPassword ? "text" : "password"}
-        name="currentPassword"
-        value={passwordData.currentPassword}
-        onChange={handlePasswordChange}
-        className="w-full bg-dark-200 border border-gray-700 rounded-lg px-4 py-2 pr-10 text-black focus:outline-none focus:ring-2 focus:ring-student-primary"
-      />
-      <button
-        type="button"
-        onClick={() => setShowCurrentPassword(!showCurrentPassword)}
-        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-neon-blue"
-      >
-        {showCurrentPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-      </button>
-    </div>
-
-    {/* New Password */}
-    <div className="relative">
-      <label htmlFor="newPassword" className="block text-sm font-medium text-gray-400 mb-1">
-        New Password
-      </label>
-      <input
-        type={showNewPassword ? "text" : "password"}
-        id="newPassword"
-        name="newPassword"
-        value={passwordData.newPassword}
-        onChange={handlePasswordChange}
-        className="w-full bg-dark-200 border border-gray-700 rounded-lg px-4 py-2 pr-10 text-black focus:outline-none focus:ring-2 focus:ring-student-primary"
-      />
-      <button
-        type="button"
-        onClick={() => setShowNewPassword(!showNewPassword)}
-        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-neon-blue"
-      >
-        {showNewPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-      </button>
-
-      {/* Password Strength Bar */}
-      {passwordData.newPassword && (
-        <div className="mt-2">
-          <p
-            className={`text-sm ${
-              getPasswordStrength(passwordData.newPassword) === "Weak"
-                ? "text-red-500"
-                : getPasswordStrength(passwordData.newPassword) === "Medium"
-                ? "text-yellow-400"
-                : "text-green-500"
-            }`}
-          >
-            Strength: {getPasswordStrength(passwordData.newPassword)}
-          </p>
-          <div className="w-full h-2 bg-gray-700 rounded mt-1">
-            <div
-              className={`h-2 rounded transition-all duration-300 ${
-                getPasswordStrength(passwordData.newPassword) === "Weak"
-                  ? "bg-red-500 w-1/3"
-                  : getPasswordStrength(passwordData.newPassword) === "Medium"
-                  ? "bg-yellow-400 w-2/3"
-                  : "bg-green-500 w-full"
-              }`}
-            ></div>
-          </div>
-
-          {/* Live Checklist */}
-          <div className="text-sm mt-2 space-y-1">
-            <p className={passwordData.newPassword.length >= 6 ? "text-green-500" : "text-gray-400"}>
-              ✔ At least 6 characters
-            </p>
-            <p className={/[A-Z]/.test(passwordData.newPassword) ? "text-green-500" : "text-gray-400"}>
-              ✔ One uppercase letter
-            </p>
-            <p className={/[a-z]/.test(passwordData.newPassword) ? "text-green-500" : "text-gray-400"}>
-              ✔ One lowercase letter
-            </p>
-            <p className={/[0-9]/.test(passwordData.newPassword) ? "text-green-500" : "text-gray-400"}>
-              ✔ One number
-            </p>
-            <p className={/[^a-zA-Z0-9]/.test(passwordData.newPassword) ? "text-green-500" : "text-gray-400"}>
-              ✔ One special character
-            </p>
-          </div>
-        </div>
-      )}
-    </div>
-
-    {/* Confirm Password */}
-    <div className="relative">
-      <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-400 mb-1">
-        Confirm New Password
-      </label>
-      <input
-        type={showConfirmPassword ? "text" : "password"}
-        id="confirmPassword"
-        name="confirmPassword"
-        value={passwordData.confirmPassword}
-        onChange={handlePasswordChange}
-        className="w-full bg-dark-200 border border-gray-700 rounded-lg px-4 py-2 pr-10 text-black focus:outline-none focus:ring-2 focus:ring-student-primary"
-      />
-      <button
-        type="button"
-        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-neon-blue"
-      >
-        {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-      </button>
-
-      {/* Confirm Match */}
-      {passwordData.confirmPassword && (
-        <p className={`text-sm mt-1 ${
-          passwordData.confirmPassword === passwordData.newPassword
-            ? "text-green-500"
-            : "text-red-500"
-        }`}>
-          {passwordData.confirmPassword === passwordData.newPassword
-            ? "✔ Passwords match"
-            : "✖ Passwords do not match"}
-        </p>
-      )}
-    </div>
-
-    <div>
-      <Button
-        className='btn btn-instructor text-sm px-4 py-2 rounded-lg hover:bg-neon-purple/10 hover:text-white hover:border hover:border-neon-purple/30 transition-all duration-300 bg-neon-blue/20 text-white border border-neon-blue/30'
-        onClick={handlePasswordSubmit}
-        disabled={loading}
-      >
-        Update Password
-      </Button>
-    </div>
-  </div>
-</div>
+            </div>
 
             <div className="pt-6 border-t border-gray-800">
               <h3 className="text-white font-medium mb-4">Two-Factor Authentication</h3>

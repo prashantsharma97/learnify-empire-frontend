@@ -47,8 +47,8 @@ export const createCourse = (data) => API.post('/instructor/upload-course', data
 export const updateCourse = (id, data) => API.put(`/instructor/update-course/${id}`, data);
 export const deleteCourse = (id) => API.delete(`/instructor/delete-course/${id}`);
 // user setting
-export const getInstructorDetails = (id, data) => API.get(`/instructor/instructor-details`);
-export const updateInstructorDetails = (data) => API.put('/instructor/update-instructor-details', data);
-export const changePassword = (data) => API.put('/instructor/change-password/', data);
+export const getInstructorDetails = (id, data) => API.get(`/auth/user-details`);
+export const updateInstructorDetails = (data) => API.put('/auth/update-user-details', data);
+export const changePassword = (data) => API.put('/auth/change-password/', data);
 
 export default API;

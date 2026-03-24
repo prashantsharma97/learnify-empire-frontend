@@ -56,7 +56,7 @@ const Progress: React.FC = () => {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 translate-x-0 fixed md:relative md:translate-x-0 z-40 transition-transform duration-300 ease-in-out">
       <Card variant="student">
         <div className="mb-6">
           <h2 className="text-2xl font-semibold text-white">Learning Progress</h2>

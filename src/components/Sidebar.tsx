@@ -11,7 +11,8 @@ import {
     FileText,
     UploadCloud,
     TrendingUp,
-    CreditCard
+    CreditCard,
+    Search
 } from 'lucide-react';
 
 // Define a type for a sidebar item
@@ -45,7 +46,7 @@ const sidebarItems: Record<Role, SidebarItem[]> = {
     ],
     student: [
         { label: 'Dashboard', path: '/dashboard/student', icon: LayoutDashboard },
-        { label: 'My Courses', path: '/dashboard/student/my-courses', icon: BookOpen },
+        { label: 'Browse Courses', path: '/dashboard/student/browse-courses', icon: Search },
         { label: 'Progress', path: '/dashboard/student/progress', icon: TrendingUp },
         { label: 'Payments', path: '/dashboard/student/payments', icon: CreditCard },
         { label: 'Settings', path: '/dashboard/settings', icon: Settings } // Added for student
@@ -56,6 +57,7 @@ const Sidebar: React.FC<SidebarProps> = ({ role }) => {
     const navigate = useNavigate();
     const onLogout = () => {
         localStorage.removeItem('token');
+        localStorage.removeItem('role');
         navigate('/login');
     };
     const location = useLocation();

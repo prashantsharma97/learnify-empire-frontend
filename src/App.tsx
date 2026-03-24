@@ -14,17 +14,19 @@ import UsersPage from './pages/Dashboard/admin/UsersPage';
 import AnalyticsPage from './pages/Dashboard/admin/AnalyticsPage';
 import Reports from './pages/Dashboard/admin/Reports';
 
-import InstructorDashboard from './pages/Dashboard/Instructor/instructorDashboard';
-import MyCourses from './pages/Dashboard/Instructor/MyCourses';
-import UploadCourse from './pages/Dashboard/Instructor/UploadCourse';
-import Earnings from './pages/Dashboard/Instructor/Earnings';
+import InstructorDashboard from './pages/Dashboard/instructor/instructorDashboard';
+import MyCourses from './pages/Dashboard/instructor/MyCourses';
+import UploadCourse from './pages/Dashboard/instructor/UploadCourse';
+import Earnings from './pages/Dashboard/instructor/Earnings';
 
-import StudentDashboard from './pages/Dashboard/Student/studentDashboard';
-import MyCoursesStudent from './pages/Dashboard/Student/MyCoursesStudent';
-import Progress from './pages/Dashboard/Student/Progress';
-import Payments from './pages/Dashboard/Student/Payments';
+import StudentDashboard from './pages/Dashboard/student/studentDashboard';
+import MyCoursesStudent from './pages/Dashboard/student/MyCoursesStudent';
+import BrowseCourses from './pages/Dashboard/student/BrowseCourses';
+import Progress from './pages/Dashboard/student/Progress';
+import Payments from './pages/Dashboard/student/Payments';
 import Settings from './pages/Dashboard/Settings';
 import { UserContextProvider } from './components/context/UserContext';
+import CourseDetail from './pages/Dashboard/student/CourseDetail';
 
 function App() {
   return (
@@ -81,6 +83,8 @@ function App() {
             >
               <Route index element={<StudentDashboard />} />
               <Route path="my-courses" element={<MyCoursesStudent />} />
+              <Route path="browse-courses" element={<BrowseCourses />} />
+              <Route path="course/:id" element={<CourseDetail />} />  // BrowseCourses ki jagah CourseDetail
               <Route path="progress" element={<Progress />} />
               <Route path="payments" element={<Payments />} />
             </Route>
