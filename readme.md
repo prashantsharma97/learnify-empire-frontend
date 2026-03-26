@@ -14,3 +14,4 @@ npm run lint | Lint the code using ESLint
 
 **env**
 VITE_APP_BASE_URL = http://localhost:5000/api
+VITE_APP_BASE_URL_IMAGE = http://localhost:5000/

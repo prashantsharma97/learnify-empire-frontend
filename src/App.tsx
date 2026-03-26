@@ -82,9 +82,10 @@ function App() {
               }
             >
               <Route index element={<StudentDashboard />} />
-              <Route path="my-courses" element={<MyCoursesStudent />} />
+              {/* <Route path="my-courses" element={<MyCoursesStudent />} /> */}
               <Route path="browse-courses" element={<BrowseCourses />} />
-              <Route path="course/:id" element={<CourseDetail />} />  // BrowseCourses ki jagah CourseDetail
+              <Route path="course/:id" element={<CourseDetail />} />
+              <Route path="my-course/:id" element={<MyCoursesStudent />} />
               <Route path="progress" element={<Progress />} />
               <Route path="payments" element={<Payments />} />
             </Route>

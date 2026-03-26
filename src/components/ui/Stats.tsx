@@ -41,7 +41,7 @@ const Stats: React.FC<StatsProps> = ({
   return (
     <div className="card glass flex items-start gap-4 p-5">
       {icon && (
-        <div className={`p-3 rounded-lg bg-opacity-10 ${getVariantClasses()} bg-current`}>
+        <div className={`p-3 rounded-lg bg-opacity-50 ${getVariantClasses()} bg-neon-purple`}>
           {icon}
         </div>
       )}

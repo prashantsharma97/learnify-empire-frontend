@@ -131,8 +131,8 @@ const Payments = () => {
               onClick={() => setActiveTab(tab.key)}
               className={
                 activeTab === tab.key
-                  ? "bg-gradient-to-r from-neon-purple to-neon-cyan text-white"
-                  : "text-gray-400 hover:bg-white/10 hover:text-white"
+                  ? "bg-gradient-to-r from-neon-purple to-neon-cyan rounded-xl text-white"
+                  : "text-gray-400 hover:bg-white/10 hover:text-white rounded-xl"
               }
             >
               {tab.icon} <span className="ml-1">{tab.label}</span>
@@ -145,7 +145,7 @@ const Payments = () => {
           <div className="space-y-4">
             <div className="flex justify-between items-center">
               <h3 className="text-xl font-semibold text-white">Transaction History</h3>
-              <Button className="bg-gradient-to-r from-neon-purple to-neon-cyan text-white">
+              <Button className="bg-gradient-to-r from-neon-purple to-neon-cyan rounded-xl text-white">
                 <Download size={16} className="mr-1" /> Download Report
               </Button>
             </div>

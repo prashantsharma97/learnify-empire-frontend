@@ -2,8 +2,10 @@ import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import toast from "react-hot-toast";
 import { getCoursesById, createCourse, updateCourse } from '../../../apiComponents/apiService.jsx';
+import { UserContext } from "../../../components/context/UserContext.jsx";
 
 const UploadCourse = () => {
+  const { user } = React.useContext(UserContext);
   const { id } = useParams();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
@@ -34,6 +36,7 @@ const UploadCourse = () => {
       const course = response.data.course;
       console.log("Fetched course data:", course);
       setCourseData({
+        instroctorId: user?.id || "",
         title: course.title || "",
         description: course.description || "",
         category: course.category || "",
@@ -105,6 +108,7 @@ const UploadCourse = () => {
 
   const [currentStep, setCurrentStep] = useState(1);
   const [courseData, setCourseData] = useState({
+    instroctorId: user?.id || "",
     title: "",
     description: "",
     category: "",
@@ -245,9 +249,9 @@ const UploadCourse = () => {
 
                     className="bg-white/5 border-white/20 text-white p-2 rounded-md w-full border border-white/20 focus:ring-2 focus:ring-blue-500"
                   >
-                    <option value="" className="bg-transparent">Select category</option>
+                    <option value="" className="bg-transparent text-gray-500">Select category</option>
                     {categories.map((category) => (
-                      <option key={category} value={category} className="bg-transparent">
+                      <option key={category} value={category} className="bg-transparent text-gray-500">
                         {category}
                       </option>
                     ))}
@@ -267,7 +271,7 @@ const UploadCourse = () => {
                   >
                     <option value="">Select level</option>
                     {levels.map((level) => (
-                      <option key={level} value={level}>
+                      <option key={level} value={level} className="text-gray-500">
                         {level}
                       </option>
                     ))}
@@ -469,7 +473,7 @@ const UploadCourse = () => {
                   className="bg-white/5 border-white/20 text-white p-2 rounded-md w-full"
                 >
                   {paymentTypes.map((type) => (
-                    <option key={type} value={type}>
+                    <option key={type} value={type} className="text-gray-500">
                       {type}
                     </option>
                   ))}

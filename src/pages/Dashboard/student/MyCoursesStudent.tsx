@@ -224,7 +224,7 @@ const MyCoursesStudent: React.FC = () => {
         {/* Courses Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredCourses.map(course => (
-            <div key={course.id} className="bg-dark-200 rounded-xl overflow-hidden">
+            <div key={course.id} className="bg-dark-200 rounded-xl overflow-hidden border border-white/10 bg-white/5 p-4 transition hover:-translate-y-1 hover:bg-white/10 cursor-pointer bg-glass-dark backdrop-blur-sm">
               <div className="h-40 overflow-hidden relative">
                 <img 
                   src={course.thumbnail} 
@@ -253,7 +253,7 @@ const MyCoursesStudent: React.FC = () => {
                   <Button 
                     variant="student" 
                     size="sm" 
-                    className="flex-1"
+                    className="flex-1 py-3 rounded-lg bg-gradient-to-r from-neon-purple to-neon-cyan text-white"
                     onClick={() => navigate(`/dashboard/student/course/${course.id}`)}  // Navigate to CourseDetailsPage
                   >
                     Continue

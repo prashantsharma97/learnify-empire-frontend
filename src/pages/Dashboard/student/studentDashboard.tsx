@@ -5,8 +5,11 @@ import Button from '../../../components/ui/Button';
 import Stats from '../../../components/ui/Stats';
 import { BookOpen, Clock, Trophy, CheckCircle } from 'lucide-react';
 import { UserContext } from '../../../components/context/UserContext';
+import { useNavigate } from 'react-router-dom';
 
 const StudentDashboard: React.FC = () => {
+
+    const navigate = useNavigate(); 
   // Mock data
   const courses = [
     {
@@ -79,7 +82,7 @@ const StudentDashboard: React.FC = () => {
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {courses.map(course => (
-              <div key={course.id} className="bg-dark-200 rounded-xl overflow-hidden">
+              <div key={course.id} className="bg-dark-200 rounded-xl overflow-hidden border border-white/10 bg-white/5 p-4 transition hover:-translate-y-1 hover:bg-white/10 cursor-pointer bg-glass-dark backdrop-blur-sm">
                 <div className="h-40 overflow-hidden">
                   <img
                     src={course.thumbnail}
@@ -98,7 +101,8 @@ const StudentDashboard: React.FC = () => {
                   <Button
                     variant="student"
                     size="sm"
-                    className="mt-3 w-full"
+                    className="mt-3 w-full py-3 mt-3 w-full rounded-lg bg-gradient-to-r from-neon-purple to-neon-cyan text-white"
+                    onClick={() => navigate(`/dashboard/student/my-course/${course.id}`)}
                   >
                     Continue
                   </Button>
