@@ -28,7 +28,6 @@ function Login() {
         const decoded: any = jwtDecode(token);
         const role = decoded.role;
         localStorage.setItem('role', role);
-        // localStorage.setItem('userId', decoded.id);
         updateUser({ id: decoded.id, name: decoded.name, email: decoded.email, role, isAuthenticated: true });
 
         if (role === 'admin') {

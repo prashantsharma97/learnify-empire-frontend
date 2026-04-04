@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';  // Import the navigate hook from React Router
+import { useNavigate } from 'react-router-dom';
 import Card from '../../../components/ui/Card';
 import ProgressBar from '../../../components/ui/ProgressBar';
 import Button from '../../../components/ui/Button';
@@ -9,92 +9,33 @@ import { getEnrolledCourseById } from '../../../apiComponents/apiService.jsx';
 
 
 const MyCoursesStudent: React.FC = () => {
-  const navigate = useNavigate();  // Hook for navigation
+  const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState<string>('');
   const { user } = React.useContext(UserContext);
-
-
-
-  // Mock data
-  // const courses = [
-  //   { 
-  //     id: 1, 
-  //     title: "Advanced Web Development", 
-  //     instructor: "Jane Smith",
-  //     progress: 75,
-  //     rating: 4.8,
-  //     category: "Development",
-  //     thumbnail: "https://images.pexels.com/photos/577585/pexels-photo-577585.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2"
-  //   },
-  //   { 
-  //     id: 2, 
-  //     title: "UX/UI Design Fundamentals", 
-  //     instructor: "John Doe",
-  //     progress: 45,
-  //     rating: 4.5,
-  //     category: "Design",
-  //     thumbnail: "https://images.pexels.com/photos/196644/pexels-photo-196644.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2" 
-  //   },
-  //   { 
-  //     id: 3, 
-  //     title: "Data Science Bootcamp", 
-  //     instructor: "Alex Johnson",
-  //     progress: 20,
-  //     rating: 4.7,
-  //     category: "Data Science",
-  //     thumbnail: "https://images.pexels.com/photos/669615/pexels-photo-669615.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2" 
-  //   },
-  //   { 
-  //     id: 4, 
-  //     title: "Mobile App Development with React Native", 
-  //     instructor: "Sarah Williams",
-  //     progress: 10,
-  //     rating: 4.6,
-  //     category: "Development",
-  //     thumbnail: "https://images.pexels.com/photos/5082579/pexels-photo-5082579.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2" 
-  //   },
-  //   { 
-  //     id: 5, 
-  //     title: "Digital Marketing Masterclass", 
-  //     instructor: "Mike Chen",
-  //     progress: 35,
-  //     rating: 4.9,
-  //     category: "Marketing",
-  //     thumbnail: "https://images.pexels.com/photos/905163/pexels-photo-905163.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2" 
-  //   },
-  // ];
-
-  const [courses, setCourses] = React.useState<any[]>([]);  // Explicit type for courses
-  const [loading, setLoading] = React.useState<boolean>(true);  // Loading state for courses
+  const [courses, setCourses] = React.useState<any[]>([]);
+  const [loading, setLoading] = React.useState<boolean>(true);
 
   React.useEffect(() => {
-    // Fetch courses from API
     const fetchCourses = async () => {
       try {
         const studentId = user?.id;
-        console.log(studentId);
         const response = await getEnrolledCourseById(studentId);
-
-        // Check the response data structure
-        console.log(response.data);
-
         if (response.data && response.data.courses) {
-          setCourses(response.data.courses);  // Set courses only if they exist
+          setCourses(response.data.courses);
         } else {
-          setCourses([]);  // If no courses found
+          setCourses([]);
         }
       } catch (error) {
         console.error("Error fetching courses:", error);
-        setCourses([]);  // Handle the case where API fails
+        setCourses([]);
       } finally {
-        setLoading(false);  // Stop loading after the API call finishes
+        setLoading(false);
       }
     };
 
     fetchCourses();
   }, [user?.id]);
 
-  // Filter courses based on search term
   const filteredCourses = courses.filter(course =>
     course.title.toLowerCase().includes(searchTerm.toLowerCase())
   );
@@ -112,7 +53,6 @@ const MyCoursesStudent: React.FC = () => {
             <p className="text-gray-400">Continue learning where you left off</p>
           </div>
 
-          {/* Search Bar */}
           <div className="flex items-center gap-2">
             <input
               type="text"
@@ -124,7 +64,6 @@ const MyCoursesStudent: React.FC = () => {
           </div>
         </div>
 
-        {/* Courses Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredCourses.map(course => (
             <div key={course.id} className="bg-dark-200 rounded-xl overflow-hidden border border-white/10 bg-white/5 p-4 transition hover:-translate-y-1 hover:bg-white/10 cursor-pointer bg-glass-dark backdrop-blur-sm">

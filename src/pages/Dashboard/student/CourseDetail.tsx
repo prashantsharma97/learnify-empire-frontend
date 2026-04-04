@@ -3,34 +3,30 @@ import { useParams, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import Button from "../../../components/ui/Button";
 import { getCourseById, enrollCourse } from "../../../apiComponents/apiService.jsx";
-import { UserContext } from "../../../components/context/UserContext.js";
 
 const CourseDetail = () => {
     const { id } = useParams();
     const navigate = useNavigate();
-    const { user } = React.useContext(UserContext);
     const [enrolled, setEnrolled] = useState(false);
     const [course, setCourse] = React.useState<any[]>([]);
     const [justEnrolled, setJustEnrolled] = useState(false);
     const [loading, setLoading] = useState(true);
 
+    const storedUser = localStorage.getItem("user");
+    const parsedUser = storedUser ? JSON.parse(storedUser) : null;
+    const parsedUserId = parsedUser?.id;
 
     useEffect(() => {
-            const getUserId = localStorage.getItem("user",user);
-
-        if (user?.id) {
-            fetchCourseDetails();
+        if (parsedUserId) {
+            fetchCourseDetails(parsedUserId);
         }
-        console.log("refresh", getUserId?.id);
-    }, [id, user?.id]);
+    }, [id]);
 
 
-    const fetchCourseDetails = async () => {
+    const fetchCourseDetails = async (userId: string) => {
         try {
-            const response = await getCourseById(id, getUserId.id );
+            const response = await getCourseById(id, userId);
             setCourse(response.data.course);
-            console.log("Course Details:", response.data.course);
-            console.log("Course Details:--", response.data.course.title);
             setEnrolled(response.data.course.isEnrolled);
         } catch (error) {
             console.error("Error fetching course details:", error);
@@ -39,7 +35,7 @@ const CourseDetail = () => {
         }
     };
 
-    const getTotalDuration = (lessons) => {
+    const getTotalDuration = (lessons: any[]) => {
         if (!lessons || lessons.length === 0) return "N/A";
         const totalMinutes = lessons.reduce((sum, lesson) => {
             const duration = lesson.duration;
@@ -53,9 +49,8 @@ const CourseDetail = () => {
     };
 
     const handleEnroll = async () => {
-        const studentId = user?.id;
         try {
-            const response = await enrollCourse({ courseId: id, studentId });
+            const response = await enrollCourse({ courseId: id, studentId: parsedUserId });
             setEnrolled(true);
             setJustEnrolled(true);
             if (response.data && response.data.message) {
@@ -66,15 +61,11 @@ const CourseDetail = () => {
             }
         } catch (error) {
             console.error("Error enrolling in course:", error);
-            setEnrolled(false); // Revert enrollment state on error
+            setEnrolled(false);
         } finally {
             setLoading(false);
         }
     };
-
-    // if (!course) {
-    //     return <p className="text-white">Loading...</p>;
-    // }
 
     return (
         <div className="space-y-8 p-4 md:p-8 translate-x-0 fixed md:relative md:translate-x-0 z-40 transition-transform duration-300 ease-in-out">

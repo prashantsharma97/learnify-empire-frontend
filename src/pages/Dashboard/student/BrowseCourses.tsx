@@ -61,7 +61,7 @@ const BrowseCourses = () => {
     }
   };
 
-  const getTotalDuration = (lessons) => {
+  const getTotalDuration = (lessons: any[] | undefined) => {
     if (!lessons || lessons.length === 0) return "N/A";
     const totalMinutes = lessons.reduce((sum, lesson) => {
       const duration = lesson.duration;
@@ -222,10 +222,7 @@ const BrowseCourses = () => {
                       >
                         🛒 Enroll
                       </Button>
-                        // bg-gradient-to-r from-red-400 via-red-500 to-red-600 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-red-300 dark:focus:ring-red-800 font-medium rounded-base text-sm px-4 py-2.5 text-center leading-5
                       )}
-
-
                   </div>
                 }
               />
