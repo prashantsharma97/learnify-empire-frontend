@@ -12,7 +12,7 @@ import axios from 'axios';
 // });
 
 const getAuthToken = () => {
-  return localStorage.getItem('token'); // Fetch token from localStorage
+  return localStorage.getItem('token'); 
 };
 
 // Create a new axios instance with a base URL and headers
@@ -40,12 +40,17 @@ API.interceptors.request.use(
 export const registerUser = (userData) => API.post('/auth/register', userData);
 export const loginUser = (userData) => API.post('/auth/login', userData);
 
-// my other CRUD APIs here all methods 
+// my other CRUD APIs here all methods for Instructor
 export const getCourses = () => API.get('/instructor/get-courses');
 export const getCoursesById = (id) => API.get(`/instructor/get-course/${id}`);
 export const createCourse = (data) => API.post('/instructor/upload-course', data);
 export const updateCourse = (id, data) => API.put(`/instructor/update-course/${id}`, data);
 export const deleteCourse = (id) => API.delete(`/instructor/delete-course/${id}`);
+// for students
+export const getAllCourses = (id) => API.get(`/student/browse-courses-list/${id}`);
+export const getCourseById = (id, id2) => API.get(`/student/browse-courses/${id}/${id2}`);
+export const getEnrolledCourseById = (id) => API.get(`/student/enrolled-courses/${id}`);
+export const enrollCourse = (data) => API.post('/student/enroll-course',data);
 // user setting
 export const getInstructorDetails = (id, data) => API.get(`/auth/user-details`);
 export const updateInstructorDetails = (data) => API.put('/auth/update-user-details', data);

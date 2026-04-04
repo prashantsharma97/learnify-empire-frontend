@@ -1,8 +1,10 @@
-import { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Button from "../../../components/ui/Button";
 import Input from "../../../components/ui/Input";
 import CourseCard from "./CourseCard";
+import { getAllCourses } from "../../../apiComponents/apiService.jsx";
+import { UserContext } from "../../../components/context/UserContext.js";
 
 const categories = [
   { icon: "🔥", label: "Trending", key: "trending" },
@@ -15,107 +17,62 @@ const categories = [
   { icon: "🔐", label: "Cybersecurity", key: "cybersecurity" },
 ];
 
-const allCourses = [
-  {
-    id: 1,
-    title: "React Advanced Patterns",
-    instructor: "Sarah Chen",
-    category: "development",
-    level: "Advanced",
-    thumbnail: "https://fastly.picsum.photos/id/880/536/354.jpg?hmac=Tpt84Al9HFHuVxRHGO8W4_7jGxTE3zkPbVrg6GZGVSU",
-    duration: "12 weeks",
-    students: 5420,
-    price: 79.99,
-    rating: 4.9,
-  },
-  {
-    id: 2,
-    title: "UI/UX Design Masterclass",
-    instructor: "Alex Rivera",
-    category: "design",
-    level: "Intermediate",
-    thumbnail: "https://fastly.picsum.photos/id/880/536/354.jpg?hmac=Tpt84Al9HFHuVxRHGO8W4_7jGxTE3zkPbVrg6GZGVSU",
-    duration: "8 weeks",
-    students: 3890,
-    price: 59.99,
-    rating: 4.8,
-  },
-  {
-    id: 3,
-    title: "Machine Learning Fundamentals",
-    instructor: "Dr. Priya Sharma",
-    category: "ai-ml",
-    level: "Intermediate",
-    thumbnail: "https://fastly.picsum.photos/id/880/536/354.jpg?hmac=Tpt84Al9HFHuVxRHGO8W4_7jGxTE3zkPbVrg6GZGVSU",
-    duration: "10 weeks",
-    students: 4120,
-    price: 89.99,
-    rating: 4.7,
-  },
-  {
-    id: 4,
-    title: "Cloud Architecture with AWS",
-    instructor: "James Wilson",
-    category: "cloud",
-    level: "Advanced",
-    thumbnail: "https://fastly.picsum.photos/id/880/536/354.jpg?hmac=Tpt84Al9HFHuVxRHGO8W4_7jGxTE3zkPbVrg6GZGVSU",
-    duration: "6 weeks",
-    students: 2340,
-    price: 99.99,
-    rating: 4.9,
-  },
-  {
-    id: 5,
-    title: "JavaScript for Beginners",
-    instructor: "Emma Johnson",
-    category: "development",
-    level: "Beginner",
-    thumbnail: "https://fastly.picsum.photos/id/880/536/354.jpg?hmac=Tpt84Al9HFHuVxRHGO8W4_7jGxTE3zkPbVrg6GZGVSU",
-    duration: "4 weeks",
-    students: 8910,
-    price: 39.99,
-    rating: 4.6,
-  },
-  {
-    id: 6,
-    title: "Cybersecurity Essentials",
-    instructor: "Marcus Stone",
-    category: "cybersecurity",
-    level: "Beginner",
-    thumbnail: "https://fastly.picsum.photos/id/880/536/354.jpg?hmac=Tpt84Al9HFHuVxRHGO8W4_7jGxTE3zkPbVrg6GZGVSU",
-    duration: "7 weeks",
-    students: 1890,
-    price: 69.99,
-    rating: 4.8,
-  },
-];
-
 const BrowseCourses = () => {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
   const [activeCategory, setActiveCategory] = useState("trending");
   const [activeLevel, setActiveLevel] = useState("all");
   const [sortBy, setSortBy] = useState("popular");
+  const [allCourses, setAllCourses] = useState([]);
+  const { user } = React.useContext(UserContext);
 
   const filteredCourses = allCourses
     .filter((course) => {
       const matchSearch =
         course.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        course.instructor.toLowerCase().includes(searchTerm.toLowerCase());
+        course.instructorId.username.toLowerCase().includes(searchTerm.toLowerCase());
       const matchCategory =
         activeCategory === "trending" || course.category === activeCategory;
       const matchLevel =
         activeLevel === "all" ||
-        course.level.toLowerCase() === activeLevel.toLowerCase();
+        course.difficultyLevel.toLowerCase() === activeLevel.toLowerCase();
       return matchSearch && matchCategory && matchLevel;
     })
     .sort((a, b) => {
-      if (sortBy === "popular") return b.students - a.students;
-      if (sortBy === "rating") return b.rating - a.rating;
-      if (sortBy === "price-low") return a.price - b.price;
-      if (sortBy === "price-high") return b.price - a.price;
+      if (sortBy === "popular") return (b.students || 0) - (a.students || 0);
+      if (sortBy === "rating") return (b.rating || 0) - (a.rating || 0);
+      if (sortBy === "price-low") return (a.pricingInfo?.coursePrice || 0) - (b.pricingInfo?.coursePrice || 0);
+      if (sortBy === "price-high") return (b.pricingInfo?.coursePrice || 0) - (a.pricingInfo?.coursePrice || 0);
       return 0;
     });
+
+  useEffect(() => {
+    fetchCourses();
+  }, []);
+
+  const fetchCourses = async () => {
+    try {
+      const studentId = user?.id;
+      const response = await getAllCourses(studentId);
+      setAllCourses(response.data.courses);
+      console.log("Fetched courses:", response.data.courses);
+    } catch (error) {
+      console.error("Error fetching courses:", error);
+    }
+  };
+
+  const getTotalDuration = (lessons) => {
+    if (!lessons || lessons.length === 0) return "N/A";
+    const totalMinutes = lessons.reduce((sum, lesson) => {
+      const duration = lesson.duration;
+      if (typeof duration === 'string') {
+        const match = duration.match(/(\d+)/);
+        return sum + (match ? parseInt(match[0]) : 0);
+      }
+      return sum + (typeof duration === 'number' ? duration : 0);
+    }, 0);
+    return `${totalMinutes} mins`;
+  };
 
   return (
     <div className="space-y-8 p-4 md:p-8 translate-x-0 fixed md:relative md:translate-x-0 z-40 transition-transform duration-300 ease-in-out">
@@ -145,11 +102,10 @@ const BrowseCourses = () => {
                 <button
                   key={cat.key}
                   onClick={() => setActiveCategory(cat.key)}
-                  className={`rounded-xl px-3 py-2 text-sm text-left transition ${
-                    activeCategory === cat.key
-                      ? "bg-neon-cyan/25 text-white border border-neon-cyan"
-                      : "bg-white/5 text-muted-foreground hover:bg-white/10"
-                  }`}
+                  className={`rounded-xl px-3 py-2 text-sm text-left transition ${activeCategory === cat.key
+                    ? "bg-neon-cyan/25 text-white border border-neon-cyan"
+                    : "bg-white/5 text-muted-foreground hover:bg-white/10"
+                    }`}
                 >
                   <div className="flex items-center gap-2">
                     <span>{cat.icon}</span>
@@ -167,11 +123,10 @@ const BrowseCourses = () => {
                 <button
                   key={level}
                   onClick={() => setActiveLevel(level)}
-                  className={`rounded-lg px-3 py-2 text-xs font-medium transition ${
-                    activeLevel === level
-                      ? "bg-neon-purple/25 text-white border border-neon-purple/40"
-                      : "bg-white/5 text-muted-foreground hover:bg-white/10"
-                  }`}
+                  className={`rounded-lg px-3 py-2 text-xs font-medium transition ${activeLevel === level
+                    ? "bg-neon-purple/25 text-white border border-neon-purple/40"
+                    : "bg-white/5 text-muted-foreground hover:bg-white/10"
+                    }`}
                 >
                   {level === "all" ? "All" : level}
                 </button>
@@ -182,20 +137,22 @@ const BrowseCourses = () => {
           <div className="space-y-2">
             <h2 className="text-lg font-semibold">Sort by</h2>
             <div className="flex flex-wrap gap-2">
-              {[
-                { key: "popular", label: "Popular" },
-                { key: "rating", label: "Top Rated" },
-                { key: "price-low", label: "Price ↑" },
-                { key: "price-high", label: "Price ↓" },
-              ].map((sort) => (
+              {[{
+                key: "popular", label: "Popular"
+              }, {
+                key: "rating", label: "Top Rated"
+              }, {
+                key: "price-low", label: "Price ↑"
+              }, {
+                key: "price-high", label: "Price ↓"
+              }].map((sort) => (
                 <button
                   key={sort.key}
                   onClick={() => setSortBy(sort.key)}
-                  className={`rounded-lg px-3 py-2 text-xs font-medium transition ${
-                    sortBy === sort.key
-                      ? "bg-neon-cyan/25 text-white border border-neon-cyan/40"
-                      : "bg-white/5 text-muted-foreground hover:bg-white/10"
-                  }`}
+                  className={`rounded-lg px-3 py-2 text-xs font-medium transition ${sortBy === sort.key
+                    ? "bg-neon-cyan/25 text-white border border-neon-cyan/40"
+                    : "bg-white/5 text-muted-foreground hover:bg-white/10"
+                    }`}
                 >
                   {sort.label}
                 </button>
@@ -232,36 +189,43 @@ const BrowseCourses = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-2 gap-6">
             {filteredCourses.map((course) => (
               <CourseCard
-                key={course.id}
+                key={course._id}
                 title={course.title}
-                instructor={course.instructor}
+                instructor={course.instructorId.username}
                 thumbnail={course.thumbnail}
-                duration={course.duration}
-                students={course.students}
-                price={course.price}
-                rating={course.rating}
+                duration={getTotalDuration(course.lessons)}
+                students={course.students || 0}
+                price={course.pricingInfo?.coursePrice || 0}
+                rating={course.rating || 0}
                 actions={
                   <div className="space-y-2">
                     <div className="flex items-center justify-between">
                       <span
-                        className={`text-xs px-2 py-1 rounded-full font-medium ${
-                          course.level === "Beginner"
-                            ? "bg-neon-green/10 text-neon-green border border-neon-green/30"
-                            : course.level === "Intermediate"
+                        className={`text-xs px-2 py-1 rounded-full font-medium ${course.difficultyLevel === "Beginner"  // Fixed: difficultyLevel
+                          ? "bg-neon-green/10 text-neon-green border border-neon-green/30"
+                          : course.difficultyLevel === "Intermediate"
                             ? "bg-neon-cyan/10 text-neon-cyan border border-neon-cyan/30"
                             : "bg-neon-magenta/10 text-neon-magenta border border-neon-magenta/30"
-                        }`}
+                          }`}
                       >
-                        {course.level}
+                        {course.difficultyLevel}
                       </span>
-                      <span className="text-neon-green font-bold text-lg">${course.price}</span>
+                      <span className="text-neon-green font-bold text-lg">${course.pricingInfo?.coursePrice || 0}</span>
                     </div>
-                    <Button
-                      onClick={() => navigate(`/dashboard/student/course/${course.id}`)}
-                      className="w-full rounded-lg bg-gradient-to-r from-neon-purple to-neon-cyan text-white"
-                    >
-                      🛒 Enroll
-                    </Button>
+                    {course.isEnrolled ?
+                      (<Button disabled className="w-full rounded-lg bg-gradient-to-r border-transparent hover:bg-danger-strong bg-gradient-to-r from-red-400 via-red-500 to-red-600 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-red-300 dark:focus:ring-red-800 focus:ring-4 focus:ring-danger-medium text-white">
+                        Already Enrolled
+                      </Button>)
+                      : (<Button
+                        onClick={() => navigate(`/dashboard/student/course/${course._id}`)}
+                        className="w-full rounded-lg bg-gradient-to-r from-neon-purple to-neon-cyan text-white"
+                      >
+                        🛒 Enroll
+                      </Button>
+                        // bg-gradient-to-r from-red-400 via-red-500 to-red-600 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-red-300 dark:focus:ring-red-800 font-medium rounded-base text-sm px-4 py-2.5 text-center leading-5
+                      )}
+
+
                   </div>
                 }
               />

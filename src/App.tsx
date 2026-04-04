@@ -14,7 +14,7 @@ import UsersPage from './pages/Dashboard/admin/UsersPage';
 import AnalyticsPage from './pages/Dashboard/admin/AnalyticsPage';
 import Reports from './pages/Dashboard/admin/Reports';
 
-import InstructorDashboard from './pages/Dashboard/instructor/instructorDashboard';
+import InstructorDashboard from './pages/Dashboard/instructor/InstructorDashboard';
 import MyCourses from './pages/Dashboard/instructor/MyCourses';
 import UploadCourse from './pages/Dashboard/instructor/UploadCourse';
 import Earnings from './pages/Dashboard/instructor/Earnings';
@@ -85,7 +85,7 @@ function App() {
               {/* <Route path="my-courses" element={<MyCoursesStudent />} /> */}
               <Route path="browse-courses" element={<BrowseCourses />} />
               <Route path="course/:id" element={<CourseDetail />} />
-              <Route path="my-course/:id" element={<MyCoursesStudent />} />
+              <Route path="my-course" element={<MyCoursesStudent />} />
               <Route path="progress" element={<Progress />} />
               <Route path="payments" element={<Payments />} />
             </Route>
