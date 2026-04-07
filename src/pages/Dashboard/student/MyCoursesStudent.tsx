@@ -4,21 +4,22 @@ import Card from '../../../components/ui/Card';
 import ProgressBar from '../../../components/ui/ProgressBar';
 import Button from '../../../components/ui/Button';
 import { BookOpen, Star } from 'lucide-react';
-import { UserContext } from '../../../components/context/UserContext';
 import { getEnrolledCourseById } from '../../../apiComponents/apiService.jsx';
+import { getUserInfo } from "../../../components/localStorage/LocalStorage.js";
 
 
 const MyCoursesStudent: React.FC = () => {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState<string>('');
-  const { user } = React.useContext(UserContext);
+  const userInfo = getUserInfo();
+  const userId = userInfo?.id;
   const [courses, setCourses] = React.useState<any[]>([]);
   const [loading, setLoading] = React.useState<boolean>(true);
 
   React.useEffect(() => {
     const fetchCourses = async () => {
       try {
-        const studentId = user?.id;
+        const studentId = userId;
         const response = await getEnrolledCourseById(studentId);
         if (response.data && response.data.courses) {
           setCourses(response.data.courses);
@@ -34,7 +35,7 @@ const MyCoursesStudent: React.FC = () => {
     };
 
     fetchCourses();
-  }, [user?.id]);
+  }, [userId]);
 
   const filteredCourses = courses.filter(course =>
     course.title.toLowerCase().includes(searchTerm.toLowerCase())

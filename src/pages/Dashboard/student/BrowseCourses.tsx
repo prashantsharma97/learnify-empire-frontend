@@ -5,6 +5,8 @@ import Input from "../../../components/ui/Input";
 import CourseCard from "./CourseCard";
 import { getAllCourses } from "../../../apiComponents/apiService.jsx";
 import { UserContext } from "../../../components/context/UserContext.js";
+import { getUserInfo } from "../../../components/localStorage/LocalStorage.js";
+
 
 const categories = [
   { icon: "🔥", label: "Trending", key: "trending" },
@@ -19,6 +21,8 @@ const categories = [
 
 const BrowseCourses = () => {
   const navigate = useNavigate();
+  const userInfo = getUserInfo();
+  const userId = userInfo?.id;
   const [searchTerm, setSearchTerm] = useState("");
   const [activeCategory, setActiveCategory] = useState("trending");
   const [activeLevel, setActiveLevel] = useState("all");
@@ -52,7 +56,7 @@ const BrowseCourses = () => {
 
   const fetchCourses = async () => {
     try {
-      const studentId = user?.id;
+      const studentId = userId;
       const response = await getAllCourses(studentId);
       setAllCourses(response.data.courses);
       console.log("Fetched courses:", response.data.courses);

@@ -2,10 +2,11 @@ import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import toast from "react-hot-toast";
 import { getCoursesById, createCourse, updateCourse } from '../../../apiComponents/apiService.jsx';
-import { UserContext } from "../../../components/context/UserContext.jsx";
+import { getUserInfo } from "../../../components/localStorage/LocalStorage.js";
 
 const UploadCourse = () => {
-  const { user } = React.useContext(UserContext);
+  const userInfo = getUserInfo();
+  const userId = userInfo?.id;
   const { id } = useParams();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
@@ -15,7 +16,6 @@ const UploadCourse = () => {
 
   const handleThumbnailUpload = (e) => {
     const file = e.target.files[0];
-    console.log("Thumbnail file:", file);
     if (!file) return;
     setThumbnailFile(file);
     const previewUrl = URL.createObjectURL(file);
@@ -36,7 +36,7 @@ const UploadCourse = () => {
       const course = response.data.course;
       console.log("Fetched course data:", course);
       setCourseData({
-        instroctorId: user?.id || "",
+        instroctorId: userId || "",
         title: course.title || "",
         description: course.description || "",
         category: course.category || "",
@@ -108,7 +108,7 @@ const UploadCourse = () => {
 
   const [currentStep, setCurrentStep] = useState(1);
   const [courseData, setCourseData] = useState({
-    instroctorId: user?.id || "",
+    instroctorId: userId || "",
     title: "",
     description: "",
     category: "",

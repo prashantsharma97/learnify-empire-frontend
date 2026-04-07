@@ -4,13 +4,15 @@ import ProgressBar from '../../../components/ui/ProgressBar';
 import Button from '../../../components/ui/Button';
 import Stats from '../../../components/ui/Stats';
 import { BookOpen, Clock, Trophy, CheckCircle } from 'lucide-react';
-import { UserContext } from '../../../components/context/UserContext';
 import { useNavigate } from 'react-router-dom';
 import { getEnrolledCourseById } from '../../../apiComponents/apiService.jsx';
+import { getUserInfo } from "../../../components/localStorage/LocalStorage.js";
+
 
 const StudentDashboard: React.FC = () => {
   const navigate = useNavigate();
-  const { user } = React.useContext(UserContext);
+  const userInfo = getUserInfo();
+  const userId = userInfo?.id;
 
   const [courses, setCourses] = React.useState<any[]>([]);  // Explicit type for courses
   const [loading, setLoading] = React.useState<boolean>(true);  // Loading state for courses
@@ -19,7 +21,7 @@ const StudentDashboard: React.FC = () => {
     // Fetch courses from API
     const fetchCourses = async () => {
       try {
-        const studentId = user?.id;
+        const studentId = userId;
         console.log(studentId);
         const response = await getEnrolledCourseById(studentId);
 
@@ -40,7 +42,7 @@ const StudentDashboard: React.FC = () => {
     };
 
     fetchCourses();
-  }, [user?.id]);  // Trigger effect when user id changes
+  }, [userId]);  // Trigger effect when user id changes
 
   const activities = [
     { id: 1, title: "Completed Module 3 in Advanced Web Development", time: "2 hours ago" },
@@ -54,12 +56,12 @@ const StudentDashboard: React.FC = () => {
     return <p className="text-white">Loading courses...</p>;
   }
 
+
   return (
     <div className="space-y-6 translate-x-0 fixed md:relative md:translate-x-0 z-40 transition-transform duration-300 ease-in-out">
       <div>
         <h1 className="text-3xl font-bold translate-x-0 fixed md:relative md:translate-x-0 z-40 transition-transform duration-300 ease-in-out mb-8">
-          {user?.role}'s Overview
-        </h1>
+          {userInfo?.role?.charAt(0).toUpperCase() + userInfo?.role?.slice(1)}'s Overview        </h1>
         <p className="text-gray-400 translate-x-0 fixed md:relative md:translate-x-0 z-40 transition-transform duration-300 ease-in-out mb-4">
           Welcome back, here’s what’s happening with your learning journey.
         </p>

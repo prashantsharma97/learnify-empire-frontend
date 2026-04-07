@@ -3,6 +3,8 @@ import { useParams, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import Button from "../../../components/ui/Button";
 import { getCourseById, enrollCourse } from "../../../apiComponents/apiService.jsx";
+import { getUserInfo } from "../../../components/localStorage/LocalStorage.js";
+
 
 const CourseDetail = () => {
     const { id } = useParams();
@@ -11,14 +13,12 @@ const CourseDetail = () => {
     const [course, setCourse] = React.useState<any[]>([]);
     const [justEnrolled, setJustEnrolled] = useState(false);
     const [loading, setLoading] = useState(true);
-
-    const storedUser = localStorage.getItem("user");
-    const parsedUser = storedUser ? JSON.parse(storedUser) : null;
-    const parsedUserId = parsedUser?.id;
+    const userInfo = getUserInfo();
+    const userId = userInfo?.id;
 
     useEffect(() => {
-        if (parsedUserId) {
-            fetchCourseDetails(parsedUserId);
+        if (userId) {
+            fetchCourseDetails(userId);
         }
     }, [id]);
 
@@ -50,7 +50,7 @@ const CourseDetail = () => {
 
     const handleEnroll = async () => {
         try {
-            const response = await enrollCourse({ courseId: id, studentId: parsedUserId });
+            const response = await enrollCourse({ courseId: id, studentId: userId });
             setEnrolled(true);
             setJustEnrolled(true);
             if (response.data && response.data.message) {
